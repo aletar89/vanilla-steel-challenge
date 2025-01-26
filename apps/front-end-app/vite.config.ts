@@ -3,6 +3,10 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+import { execSync } from 'child_process';
+
+const commitHash = execSync('git rev-parse --short HEAD').toString().trim();
+
 
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
@@ -38,6 +42,9 @@ export default defineConfig(({ mode }) => {
           ? '/src/environments/environment.prod.ts'
           : '/src/environments/environment.ts'
       }
+    },
+    define: {
+      __COMMIT_HASH__: JSON.stringify(commitHash),
     },
   };
 });

@@ -9,6 +9,7 @@ import { DataTable } from './components/DataTable';
 import { DataForm } from './components/DataForm';
 
 const theme = createTheme();
+console.log(`App version: ${__COMMIT_HASH__}`);
 
 export function App() {
   return (
