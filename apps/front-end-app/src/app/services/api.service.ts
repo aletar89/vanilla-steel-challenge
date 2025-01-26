@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { environment } from '../../environments/environment';
+import { DataItem } from '../types/data.types';
 
 const api = axios.create({
   baseURL: environment.apiUrl,
@@ -8,10 +9,9 @@ const api = axios.create({
   },
 });
 
-export const apiService = {
-  // Example methods - add more as needed
-  getData: async () => {
-    const response = await api.get('/api/data');
+const apiService = {
+  getData: async (): Promise<DataItem[]> => {
+    const response = await api.get<DataItem[]>('/api/data');
     return response.data;
   },
 

@@ -10,9 +10,10 @@ import {
   Typography,
 } from '@mui/material';
 import apiService from '../services/api.service';
+import { DataItem } from '../types/data.types';
 
 export function DataTable() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<DataItem[]>([]);
 
   useEffect(() => {
     apiService.getData().then(setData);
@@ -30,7 +31,7 @@ export function DataTable() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((row: any) => (
+            {data.map((row: DataItem) => (
               <TableRow key={row.id}>
                 <TableCell>{row.id}</TableCell>
                 <TableCell>{row.name}</TableCell>
