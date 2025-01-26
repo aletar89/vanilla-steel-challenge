@@ -1,7 +1,7 @@
 {
   "name": "back-end-app",
-  "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "back-end-app/src",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/back-end-app/src",
   "projectType": "application",
   "tags": [],
   "targets": {
@@ -11,12 +11,12 @@
       "defaultConfiguration": "production",
       "options": {
         "platform": "node",
-        "outputPath": "dist/back-end-app",
+        "outputPath": "dist/apps/back-end-app",
         "format": ["cjs"],
         "bundle": false,
-        "main": "back-end-app/src/main.ts",
-        "tsConfig": "back-end-app/tsconfig.app.json",
-        "assets": ["back-end-app/src/assets"],
+        "main": "apps/back-end-app/src/main.ts",
+        "tsConfig": "apps/back-end-app/tsconfig.app.json",
+        "assets": ["apps/back-end-app/src/assets"],
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,
