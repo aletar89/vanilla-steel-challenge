@@ -7,9 +7,6 @@
     "strict": true,
     "jsxImportSource": "@emotion/react",
     "types": ["vite/client"],
-    "paths": {
-      "@environments": ["./src/environments/environment.ts"]
-    }
   },
   "files": [],
   "include": [],
