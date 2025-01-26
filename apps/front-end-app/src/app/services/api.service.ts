@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { environment } from '../../environments/environment';
-import { DataItem } from '../types/data.types';
+import { DataItem, PreferenceFormData, PreferenceResponse } from '../types/data.types';
 
 const api = axios.create({
   baseURL: environment.apiUrl,
@@ -15,8 +15,8 @@ const apiService = {
     return response.data;
   },
 
-  submitForm: async (formData: any) => {
-    const response = await api.post('/api/preferences', formData);
+  submitForm: async (formData: PreferenceFormData): Promise<PreferenceResponse> => {
+    const response = await api.post<PreferenceResponse>('/api/preferences', formData);
     return response.data;
   },
 };
