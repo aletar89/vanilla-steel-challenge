@@ -9,7 +9,11 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Snackbar,
+  Alert,
+  SelectChangeEvent,
 } from '@mui/material';
+import apiService from '../services/api.service';
 
 export function DataForm() {
   const [formData, setFormData] = useState({
@@ -17,18 +21,32 @@ export function DataForm() {
     email: '',
     role: '',
   });
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Handle form submission here
+    try {
+      await apiService.submitForm(formData);
+      setShowSuccess(true);
+      setFormData({ name: '', email: '', role: '' }); // Reset form
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name as string]: value,
+      [name]: value,
+    }));
+  };
+
+  const handleSelectChange = (e: SelectChangeEvent) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
     }));
   };
 
@@ -44,7 +62,7 @@ export function DataForm() {
             name="name"
             label="Name"
             value={formData.name}
-            onChange={handleChange}
+            onChange={handleTextChange}
             fullWidth
           />
           <TextField
@@ -53,7 +71,7 @@ export function DataForm() {
             label="Email"
             type="email"
             value={formData.email}
-            onChange={handleChange}
+            onChange={handleTextChange}
             fullWidth
           />
           <FormControl fullWidth required>
@@ -62,7 +80,7 @@ export function DataForm() {
               name="role"
               value={formData.role}
               label="Role"
-              onChange={handleChange}
+              onChange={handleSelectChange}
             >
               <MenuItem value="Admin">Admin</MenuItem>
               <MenuItem value="User">User</MenuItem>
@@ -79,6 +97,13 @@ export function DataForm() {
           </Button>
         </Box>
       </Paper>
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={6000}
+        onClose={() => setShowSuccess(false)}
+      >
+        <Alert severity="success">Preferences saved successfully!</Alert>
+      </Snackbar>
     </>
   );
 } 

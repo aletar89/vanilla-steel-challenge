@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   Paper,
   Table,
@@ -8,40 +9,31 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-
-// Sample data - replace with your actual data
-const rows = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User' },
-];
+import apiService from '../services/api.service';
 
 export function DataTable() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    apiService.getData().then(setData);
+  }, []);
+
   return (
     <>
-      <Typography variant="h4" gutterBottom>
-        Data Table
-      </Typography>
+      <Typography variant="h4" gutterBottom>Inventory Data</Typography>
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <Table>
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Role</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row) => (
-              <TableRow
-                key={row.id}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
+            {data.map((row: any) => (
+              <TableRow key={row.id}>
                 <TableCell>{row.id}</TableCell>
                 <TableCell>{row.name}</TableCell>
-                <TableCell>{row.email}</TableCell>
-                <TableCell>{row.role}</TableCell>
               </TableRow>
             ))}
           </TableBody>
