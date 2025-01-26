@@ -1,5 +1,5 @@
 /// <reference types='vitest' />
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
@@ -7,14 +7,10 @@ import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
-  const env = loadEnv(mode, process.cwd(), '');
 
   return {
     root: __dirname,
     cacheDir: '../../node_modules/.vite/apps/front-end-app',
-    define: {
-      'process.env.NODE_ENV': JSON.stringify(mode)
-    },
     server: {
       port: 4200,
       host: 'localhost',
@@ -35,6 +31,13 @@ export default defineConfig(({ mode }) => {
       commonjsOptions: {
         transformMixedEsModules: true,
       },
+    },
+    resolve: {
+      alias: {
+        '@environments': mode === 'production'
+          ? '/src/environments/environment.prod.ts'
+          : '/src/environments/environment.ts'
+      }
     },
   };
 });

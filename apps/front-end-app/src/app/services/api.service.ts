@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { environment } from '../../environments/environment';
+import { environment } from '@environments';
 import { DataItem, PreferenceFormData, PreferenceResponse } from '../types/data.types';
 
 const api = axios.create({
