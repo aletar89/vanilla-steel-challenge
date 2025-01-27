@@ -2,15 +2,13 @@ export function sharedTypes(): string {
   return 'shared-types';
 }
 
-import { ColumnType } from 'kysely';
-
 export interface Database {
-  inventory: InventoryTable;
+  inventory: InventoryRow;
 }
 
-export interface InventoryTable {
-  id: ColumnType<number>;
-  productNumber: string;
+export interface InventoryRow {
+  id: number;
+  product_number: string;
   material: string;
   form: string;
   choice: string;
@@ -19,18 +17,14 @@ export interface InventoryTable {
   surface: string | null;
   quantity: number;
   weight: number;
-  length: number | null;
-  width: number | null;
-  height: number | null;
-  thickness: number | null;
-  outerDiameter: number | null;
-  wallThickness: number | null;
-  webThickness: number | null;
-  flangeThickness: number | null;
+  length_mm: number | null;
+  width_mm: number | null;
+  height_mm: number | null;
+  thickness_mm: number | null;
+  outer_diameter_mm: number | null;
+  wall_thickness_mm: number | null;
+  web_thickness_mm : number | null;
+  flange_thickness_mm: number | null;
   certificates: string | null;
   location: string | null;
-  createdAt: ColumnType<Date>;
-  updatedAt: ColumnType<Date>;
 }
-
-export type Inventory = Omit<InventoryTable, 'createdAt' | 'updatedAt'>;

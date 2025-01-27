@@ -2,7 +2,7 @@ import { parse } from 'csv-parse';
 import * as fs from 'fs';
 import * as path from 'path';
 import db from '../lib/db-client';
-import { InventoryTable } from '@org/shared-types';
+import { InventoryRow } from '@org/shared-types';
 
 const BATCH_SIZE = 1000; // Process 1000 records at a time
 
@@ -57,11 +57,11 @@ async function importInventory() {
 
     let processedCount = 0;
     let lastReportedPercentage = 0;
-    let batch: Omit<InventoryTable, 'id' | 'createdAt' | 'updatedAt'>[] = [];
+    let batch: Omit<InventoryRow, 'id'>[] = [];
 
     for await (const record of parser) {
       batch.push({
-        productNumber: record['Product Number'],
+        product_number: record['Product Number'],
         material: record['Material'],
         form: record['Form'],
         choice: record['Choice'],
@@ -70,14 +70,14 @@ async function importInventory() {
         surface: record['Surface'] || null,
         quantity: parseInt(record['Quantity']),
         weight: parseFloat(record['Weight (t)']),
-        length: record['Length (mm)'] ? parseFloat(record['Length (mm)']) : null,
-        width: record['Width (mm)'] ? parseFloat(record['Width (mm)']) : null,
-        height: record['Height (mm)'] ? parseFloat(record['Height (mm)']) : null,
-        thickness: record['Thickness (mm)'] ? parseFloat(record['Thickness (mm)']) : null,
-        outerDiameter: record['Outer Diameter (mm)'] ? parseFloat(record['Outer Diameter (mm)']) : null,
-        wallThickness: record['Wall Thickness (mm)'] ? parseFloat(record['Wall Thickness (mm)']) : null,
-        webThickness: record['Web Thickness (mm)'] ? parseFloat(record['Web Thickness (mm)']) : null,
-        flangeThickness: record['Flange Thickness (mm)'] ? parseFloat(record['Flange Thickness (mm)']) : null,
+        length_mm: record['Length (mm)'] ? parseFloat(record['Length (mm)']) : null,
+        width_mm: record['Width (mm)'] ? parseFloat(record['Width (mm)']) : null,
+        height_mm: record['Height (mm)'] ? parseFloat(record['Height (mm)']) : null,
+        thickness_mm: record['Thickness (mm)'] ? parseFloat(record['Thickness (mm)']) : null,
+        outer_diameter_mm: record['Outer Diameter (mm)'] ? parseFloat(record['Outer Diameter (mm)']) : null,
+        wall_thickness_mm: record['Wall Thickness (mm)'] ? parseFloat(record['Wall Thickness (mm)']) : null,
+        web_thickness_mm: record['Web Thickness (mm)'] ? parseFloat(record['Web Thickness (mm)']) : null,
+        flange_thickness_mm: record['Flange Thickness (mm)'] ? parseFloat(record['Flange Thickness (mm)']) : null,
         certificates: record['Certificates'] || null,
         location: record['Location'] || null,
       });
