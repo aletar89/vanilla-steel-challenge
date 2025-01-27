@@ -7,7 +7,6 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: __dirname + '/../../.env' });
 
 // Create the Kysely database instance
-console.log(process.env.DATABASE_URL);
 const db = new Kysely<Database>({
   dialect: new PostgresDialect({
     pool: new Pool({

@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import db from './lib/db-client';
+
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 const app = express();
@@ -17,20 +19,19 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // API routes
-app.get('/api/data', (req, res) => {
-  // Replace with your actual data
-  console.log('Fetching data...');
-  res.json([
-    { id: 1, name: 'Item 1' },
-    { id: 2, name: 'Item 2' },
-  ]);
-});
-
-app.post('/api/preferences', (req, res) => {
-  const formData = req.body;
-  // Handle the form data (e.g., save to database)
-  console.log('Received form data:', formData);
-  res.json({ success: true, message: 'Preferences saved successfully' });
+app.get('/api/inventory', async (req, res) => {
+  try {
+    const inventory = await db
+      .selectFrom('inventory')
+      .selectAll()
+      .limit(10)
+      .execute();
+    
+    res.json(inventory);
+  } catch (error) {
+    console.error('Error fetching inventory:', error);
+    res.status(500).json({ error: 'Failed to fetch inventory data' });
+  }
 });
 
 app.listen(port, () => {

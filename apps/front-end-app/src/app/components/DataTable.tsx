@@ -10,13 +10,14 @@ import {
   Typography,
 } from '@mui/material';
 import apiService from '../services/api.service';
-import { DataItem } from '../types/data.types';
+import { Inventory } from '@org/shared-types';
+
 
 export function DataTable() {
-  const [data, setData] = useState<DataItem[]>([]);
+  const [inventory, setInventory] = useState<Inventory[]>([]);
 
   useEffect(() => {
-    apiService.getData().then(setData);
+    apiService.getInventory().then(setInventory);
   }, []);
 
   return (
@@ -26,15 +27,25 @@ export function DataTable() {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Name</TableCell>
+              <TableCell>Product Number</TableCell>
+              <TableCell>Material</TableCell>
+              <TableCell>Form</TableCell>
+              <TableCell>Grade</TableCell>
+              <TableCell>Quantity</TableCell>
+              <TableCell>Weight (t)</TableCell>
+              <TableCell>Location</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.map((row: DataItem) => (
-              <TableRow key={row.id}>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{row.name}</TableCell>
+            {inventory.map((row) => (
+              <TableRow key={row.productNumber}>
+                <TableCell>{row.productNumber}</TableCell>
+                <TableCell>{row.material}</TableCell>
+                <TableCell>{row.form}</TableCell>
+                <TableCell>{row.grade}</TableCell>
+                <TableCell>{row.quantity}</TableCell>
+                <TableCell>{row.weight}</TableCell>
+                <TableCell>{row.location || '-'}</TableCell>
               </TableRow>
             ))}
           </TableBody>
