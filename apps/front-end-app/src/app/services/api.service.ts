@@ -1,7 +1,7 @@
 import axios from 'axios';
 // @ts-expect-error - environment is a global variable injected by Vite.
 import { environment } from '@environments';
-import { DataItem, PreferenceFormData, PreferenceResponse } from '../types/data.types';
+import { DataItem, PreferenceFormData, PreferenceResponse } from '@org/shared-types';
 
 const api = axios.create({
   baseURL: environment.apiUrl,
