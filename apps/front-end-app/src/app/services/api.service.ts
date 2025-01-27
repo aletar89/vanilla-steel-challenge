@@ -1,7 +1,7 @@
 import axios from 'axios';
 // @ts-expect-error - environment is a global variable injected by Vite.
 import { environment } from '@environments';
-import { Inventory  } from '@org/shared-types';
+import { InventoryRow  } from '@org/shared-types';
 
 
 const api = axios.create({
@@ -12,8 +12,8 @@ const api = axios.create({
 });
 
 const apiService = {
-  getInventory: async (): Promise<Inventory[]> => {
-    const response = await api.get<Inventory[]>('/api/inventory');
+  getInventory: async (): Promise<InventoryRow[]> => {
+    const response = await api.get<InventoryRow[]>('/api/inventory');
     return response.data;
   },
 };
