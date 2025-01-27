@@ -16,3 +16,9 @@ To run the back-end locally:
 
 ```sh
 npx nx serve back-end-app
+```
+
+To initialize the inventory in the DB:
+```sd
+cd apps/back-end-app && npx prisma generate && npx prisma db push && npx tsx src/scripts/import-inventory.ts
+```
