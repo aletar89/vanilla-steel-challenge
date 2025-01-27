@@ -1,9 +1,9 @@
-import { PrismaClient, Prisma } from '@prisma/client';
 import { parse } from 'csv-parse';
 import * as fs from 'fs';
 import * as path from 'path';
+import db from '../lib/db-client';
+import { InventoryTable } from '@org/shared-types';
 
-const prisma = new PrismaClient();
 const BATCH_SIZE = 1000; // Process 1000 records at a time
 
 async function countCsvRows(filePath: string): Promise<number> {
@@ -29,7 +29,11 @@ async function importInventory() {
     console.log(`Total rows in CSV: ${totalRows}`);
 
     // Get initial count
-    const initialCount = await prisma.inventory.count();
+    const initialCount = await db.selectFrom('inventory')
+      .select(db.fn.count<string>('id').as('count'))
+      .executeTakeFirst()
+      .then(result => parseInt(result?.count as string || '0'));
+    
     console.log(`Initial row count in database: ${initialCount}`);
 
     if (initialCount == totalRows) {
@@ -40,7 +44,7 @@ async function importInventory() {
     // Clear table if partially filled
     if (initialCount > 0) {
       console.log('Table is partially filled. Clearing existing records...');
-      await prisma.inventory.deleteMany({});
+      await db.deleteFrom('inventory').execute();
       console.log('Table cleared successfully');
     }
 
@@ -53,7 +57,7 @@ async function importInventory() {
 
     let processedCount = 0;
     let lastReportedPercentage = 0;
-    let batch: Prisma.InventoryCreateInput[] = [];
+    let batch: Omit<InventoryTable, 'id' | 'createdAt' | 'updatedAt'>[] = [];
 
     for await (const record of parser) {
       batch.push({
@@ -82,10 +86,9 @@ async function importInventory() {
 
       // When batch is full or we've reached the end, insert the batch
       if (batch.length === BATCH_SIZE || processedCount === totalRows) {
-        await prisma.inventory.createMany({
-          data: batch,
-          skipDuplicates: true,
-        });
+        await db.insertInto('inventory')
+          .values(batch)
+          .execute();
         
         const currentPercentage = Math.floor((processedCount / totalRows) * 100);
         if (currentPercentage >= lastReportedPercentage + 1) {
@@ -98,15 +101,17 @@ async function importInventory() {
     }
 
     // Get final count
-    const finalCount = await prisma.inventory.count();
+    const finalCount = await db.selectFrom('inventory')
+      .select(db.fn.count<string>('id').as('count'))
+      .executeTakeFirst()
+      .then(result => parseInt(result?.count as string || '0'));
+
     console.log(`Import completed successfully`);
     console.log(`Rows added: ${finalCount - initialCount}`);
     console.log(`Final row count: ${finalCount}`);
 
   } catch (error) {
     console.error('Error importing data:', error);
-  } finally {
-    await prisma.$disconnect();
   }
 }
 
