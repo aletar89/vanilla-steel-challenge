@@ -12,6 +12,8 @@ import {
   TableSortLabel,
   LinearProgress,
   Box,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import apiService, { SortOrder } from '../services/api.service';
 import { InventoryRow } from '@org/shared-types';
@@ -24,9 +26,17 @@ export function DataTable() {
   const [total, setTotal] = useState(0);
   const [formChoiceSort, setFormChoiceSort] = useState<SortOrder | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
+  const [showLongLoadingMessage, setShowLongLoadingMessage] = useState(false);
 
   const fetchInventory = useCallback(async () => {
     setIsLoading(true);
+    setShowLongLoadingMessage(false);
+    
+    // Start a timer to show the message if loading takes more than 3 seconds
+    const loadingMessageTimer = setTimeout(() => {
+      setShowLongLoadingMessage(true);
+    }, 3000);
+
     try {
       const response = await apiService.getInventory(
         page + 1, 
@@ -38,6 +48,7 @@ export function DataTable() {
     } catch (error) {
       console.error('Error fetching inventory:', error);
     } finally {
+      clearTimeout(loadingMessageTimer);
       setIsLoading(false);
     }
   }, [page, rowsPerPage, formChoiceSort]);
@@ -65,7 +76,6 @@ export function DataTable() {
     }
     setPage(0);
   };
-
 
   return (
     <>
@@ -131,6 +141,16 @@ export function DataTable() {
           />
         </Box>
       </TableContainer>
+
+      <Snackbar
+        open={showLongLoadingMessage}
+        onClose={() => setShowLongLoadingMessage(false)}
+        autoHideDuration={6000}
+      >
+        <Alert severity="info" onClose={() => setShowLongLoadingMessage(false)}>
+          The backend may have been spun down due to inactivity. The first request could take up to 1 minute.
+        </Alert>
+      </Snackbar>
     </>
   );
 } 

@@ -15,21 +15,13 @@ export interface CSVUploadResponse {
 
 interface Cache {
   [key: string]: {
-    data: PaginatedInventory | InventoryStatsType  | CSVUploadResponse;
+    data: PaginatedInventory | InventoryStatsType;
     timestamp: number;
   };
 }
 
 const CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 const cache: Cache = {};
-
-
-const calculateFileHash = async (file: File): Promise<string> => {
-  const buffer = await file.arrayBuffer();
-  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-};
 
 const api = axios.create({
   baseURL: environment.apiUrl,
@@ -80,13 +72,6 @@ const apiService = {
   },
   uploadCSV: async (file: File): Promise<CSVUploadResponse> => {
     try {
-      const fileHash = await calculateFileHash(file);
-      const cachedUpload = cache[fileHash];
-
-      if (cachedUpload && Date.now() - cachedUpload.timestamp < CACHE_EXPIRY_MS) {
-        return cachedUpload.data as CSVUploadResponse;
-      }
-
       const formData = new FormData();
       formData.append('file', file);
       const response = await api.post<CSVUploadResponse>('/api/upload-csv', formData, {
@@ -94,11 +79,6 @@ const apiService = {
           'Content-Type': 'multipart/form-data',
         },
       });
-
-      cache[fileHash] = {
-        data: response.data,
-        timestamp: Date.now()
-      };
 
       return response.data;
     } catch (error) {

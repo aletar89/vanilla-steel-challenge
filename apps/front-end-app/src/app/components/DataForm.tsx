@@ -48,10 +48,6 @@ export function DataForm() {
       } else {
         setError('No matching items found');
       }
-      // Clear the file and input element
-      setFile(null);
-      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
     } catch (error) {
       console.error('Error uploading file:', error);
       setError('Failed to process the CSV file. Please check the format and try again.');
