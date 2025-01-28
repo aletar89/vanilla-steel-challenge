@@ -3,6 +3,10 @@ import axios from 'axios';
 import { environment } from '@environments';
 import { InventoryRow, InventoryStatsType  } from '@org/shared-types';
 
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+}
 
 const api = axios.create({
   baseURL: environment.apiUrl,
@@ -12,8 +16,10 @@ const api = axios.create({
 });
 
 const apiService = {
-  getInventory: async (): Promise<InventoryRow[]> => {
-    const response = await api.get<InventoryRow[]>('/api/inventory');
+  getInventory: async (page = 1, pageSize = 10): Promise<PaginatedResponse<InventoryRow>> => {
+    const response = await api.get<PaginatedResponse<InventoryRow>>('/api/inventory', {
+      params: { page, pageSize }
+    });
     return response.data;
   },
   getInventoryStats: async (): Promise<InventoryStatsType> => {

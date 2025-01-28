@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Paper,
   Table,
@@ -8,16 +8,35 @@ import {
   TableHead,
   TableRow,
   Typography,
+  TablePagination,
 } from '@mui/material';
 import apiService from '../services/api.service';
 import { InventoryRow } from '@org/shared-types';
 
 export function DataTable() {
   const [inventory, setInventory] = useState<InventoryRow[]>([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [total, setTotal] = useState(0);
+
+  const fetchInventory = useCallback(async () => {
+    const response = await apiService.getInventory(page + 1, rowsPerPage);
+    setInventory(response.data);
+    setTotal(response.total);
+  }, [page, rowsPerPage]);
 
   useEffect(() => {
-    apiService.getInventory().then(setInventory);
-  }, []);
+    fetchInventory();
+  }, [fetchInventory]);
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const formatDimensions = (row: InventoryRow): string => {
     const dimensions = [];
@@ -64,6 +83,15 @@ export function DataTable() {
             ))}
           </TableBody>
         </Table>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={total}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </TableContainer>
     </>
   );

@@ -47,13 +47,29 @@ app.get('/api/inventory/stats', async (req, res) => {
 
 app.get('/api/inventory', async (req, res) => {
   try {
-    const inventory = await db
-      .selectFrom('inventory')
-      .selectAll()
-      .limit(10)
-      .execute();
+    const page = parseInt(req.query.page as string) || 1;
+    const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const offset = (page - 1) * pageSize;
+
+    const [inventory, totalCount] = await Promise.all([
+      db
+        .selectFrom('inventory')
+        .selectAll()
+        .limit(pageSize)
+        .offset(offset)
+        .execute(),
+      db
+        .selectFrom('inventory')
+        .select(({ fn }) => [
+          fn.count('id').as('total')
+        ])
+        .executeTakeFirst()
+    ]);
     
-    res.json(inventory);
+    res.json({
+      data: inventory,
+      total: totalCount?.total || 0
+    });
   } catch (error) {
     console.error('Error fetching inventory:', error);
     res.status(500).json({ error: 'Failed to fetch inventory data' });
