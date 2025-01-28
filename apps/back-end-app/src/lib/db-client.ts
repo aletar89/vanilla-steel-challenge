@@ -1,6 +1,6 @@
 import { Kysely, PostgresDialect } from 'kysely';
 import { Pool } from 'pg';
-import { Database } from '@org/shared-types';
+import { Database, InventoryStatsType, PaginatedInventory } from '@org/shared-types';
 import * as dotenv from 'dotenv';
 
 // Load environment variables from .env file
@@ -21,17 +21,8 @@ const db = new Kysely<Database>({
   }),
 });
 
-export interface InventoryStats {
-  totalItems: number;
-  totalVolume: number;
-}
 
-export interface PaginatedInventory {
-  data: Database['inventory'][];
-  total: number;
-}
-
-export async function getInventoryStats(): Promise<InventoryStats> {
+export async function getInventoryStats(): Promise<InventoryStatsType> {
   const totalItems = await db
     .selectFrom('inventory')
     .select(({ fn }) => [

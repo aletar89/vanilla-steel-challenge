@@ -32,6 +32,11 @@ export interface InventoryRow {
   location: string | null;
 }
 
+export interface PaginatedInventory {
+  data: InventoryRow[];
+  total: number;
+}
+
 export interface InventoryStatsType {
   totalItems: number;
   totalVolume: number;
