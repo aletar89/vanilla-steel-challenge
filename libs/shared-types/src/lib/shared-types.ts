@@ -55,3 +55,5 @@ export interface PreferenceRow {
   min_thickness: number;
   max_thickness: number;
 }
+
+export type PreferenceMatchRow = Omit<InventoryRow, 'id' | 'finish' | 'surface' | 'quantity'| 'location' | 'certificates'>

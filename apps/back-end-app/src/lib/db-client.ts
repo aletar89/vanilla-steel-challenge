@@ -1,6 +1,6 @@
-import { Kysely, PostgresDialect } from 'kysely';
+import { Kysely, PostgresDialect} from 'kysely';
 import { Pool } from 'pg';
-import { Database, InventoryStatsType, PaginatedInventory } from '@org/shared-types';
+import { Database, InventoryStatsType, PaginatedInventory, PreferenceRow, PreferenceMatchRow } from '@org/shared-types';
 import * as dotenv from 'dotenv';
 
 // Load environment variables from .env file
@@ -80,6 +80,65 @@ export async function getInventory(
     data: inventory,
     total: Number(totalCount?.total) || 0
   };
+}
+
+export async function insertPreferences(preferences: Omit<PreferenceRow, 'id'>[]): Promise<void> {
+  await db.insertInto('preferences')
+    .values(preferences)
+    .execute();
+}
+
+export async function findMatchingInventory(filename: string, timestamp: string): Promise<PreferenceMatchRow[]> {
+  const query = db
+    .selectFrom('inventory')
+    .innerJoin('preferences', join => join
+      .on('preferences.filename', '=', filename)
+      .on('preferences.timestamp', '=', timestamp)
+      .onRef('preferences.material', '=', 'inventory.material')
+      .onRef('preferences.form', '=', 'inventory.form')
+      .onRef('preferences.grade', '=', 'inventory.grade')
+      .on((eb) => 
+        eb('preferences.choice', 'is', null)
+        .or('preferences.choice', '=', '')
+        .or('preferences.choice', '=', eb.ref('inventory.choice'))
+      )
+      .on((eb) => 
+        eb('preferences.min_width', 'is', null)
+        .or('inventory.width_mm', '>=', eb.ref('preferences.min_width'))
+      )
+      .on((eb) =>
+        eb('preferences.max_width', 'is', null)
+        .or('inventory.width_mm', '<=', eb.ref('preferences.max_width'))
+      )
+      .on((eb) =>
+        eb('preferences.min_thickness', 'is', null)
+        .or('inventory.thickness_mm', '>=', eb.ref('preferences.min_thickness'))
+      )
+      .on((eb) =>
+        eb('preferences.max_thickness', 'is', null)
+        .or('inventory.thickness_mm', '<=', eb.ref('preferences.max_thickness'))
+      )
+    )
+    .where('inventory.weight_t', '>', 10)
+    .select([
+      'inventory.product_number',
+      'inventory.material',
+      'inventory.form',
+      'inventory.choice',
+      'inventory.grade',
+      'inventory.weight_t',
+      'inventory.length_mm',
+      'inventory.width_mm',
+      'inventory.height_mm',
+      'inventory.thickness_mm',
+      'inventory.outer_diameter_mm',
+      'inventory.wall_thickness_mm',
+      'inventory.web_thickness_mm',
+      'inventory.flange_thickness_mm'
+    ])
+    .distinct();
+  const result = await query.execute();
+  return result;
 }
 
 export default db; 

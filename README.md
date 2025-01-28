@@ -20,5 +20,5 @@ npx nx serve back-end-app
 
 To initialize the DB:
 ```sd
-cd apps/back-end-app && npx prisma generate && npx prisma db push && npx tsx src/scripts/import-inventory.ts
+npx tsx apps/back-end-app/src/scripts/import-inventory.ts
 ```

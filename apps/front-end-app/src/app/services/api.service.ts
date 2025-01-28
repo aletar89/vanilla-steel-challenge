@@ -1,11 +1,15 @@
 import axios from 'axios';
 // @ts-expect-error - environment is a global variable injected by Vite.
 import { environment } from '@environments';
-import { InventoryStatsType, PaginatedInventory } from '@org/shared-types';
+import { InventoryStatsType, PaginatedInventory, PreferenceMatchRow } from '@org/shared-types';
 
 
 export type SortOrder = 'asc' | 'desc';
 export type SortField = 'weight_t' | 'form_choice';
+
+export interface CSVUploadResponse {
+  data: PreferenceMatchRow[];
+}
 
 const api = axios.create({
   baseURL: environment.apiUrl,
@@ -27,6 +31,16 @@ const apiService = {
   },
   getInventoryStats: async (): Promise<InventoryStatsType> => {
     const response = await api.get<InventoryStatsType>('/api/inventory/stats');
+    return response.data;
+  },
+  uploadCSV: async (file: File): Promise<CSVUploadResponse> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await api.post<CSVUploadResponse>('/api/upload-csv', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 };

@@ -2,82 +2,159 @@ import { useState } from 'react';
 import {
   Box,
   Button,
-  TextField,
   Typography,
   Paper,
   Snackbar,
   Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
 } from '@mui/material';
 import apiService from '../services/api.service';
-import { DataItem, PreferenceResponse } from '../types/data.types';
+import { PreferenceMatchRow } from '@org/shared-types';
 
 export function DataForm() {
-  const [formData, setFormData] = useState<DataItem>({
-    id: 0,
-    name: '',
-  });
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [results, setResults] = useState<PreferenceMatchRow[]>([]);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response: PreferenceResponse = await apiService.submitForm(formData);
-      console.log(response);
-      setShowSuccess(true);
-      setFormData({ id: 0, name: '' }); // Reset form
-    } catch (error) {
-      console.error('Error submitting form:', error);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setFile(event.target.files[0]);
+      setError(null);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === 'id' ? Number(value) : value,
-    }));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) {
+      setError('Please select a file');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await apiService.uploadCSV(file);
+      setResults(response.data);
+      setShowSuccess(true);
+      setFile(null);
+      // Reset the file input
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      setError('Failed to process the CSV file. Please check the format and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // TODO: merge with the other dimentions formatter
+  const getDimensions = (row: PreferenceMatchRow): string => {
+    const dimensions = [];
+    if (row.length_mm) dimensions.push(`L: ${row.length_mm}mm`);
+    if (row.width_mm) dimensions.push(`W: ${row.width_mm}mm`);
+    if (row.height_mm) dimensions.push(`H: ${row.height_mm}mm`);
+    if (row.thickness_mm) dimensions.push(`T: ${row.thickness_mm}mm`);
+    if (row.outer_diameter_mm) dimensions.push(`OD: ${row.outer_diameter_mm}mm`);
+    if (row.wall_thickness_mm) dimensions.push(`WT: ${row.wall_thickness_mm}mm`);
+    if (row.web_thickness_mm) dimensions.push(`WebT: ${row.web_thickness_mm}mm`);
+    if (row.flange_thickness_mm) dimensions.push(`FlangeT: ${row.flange_thickness_mm}mm`);
+    return dimensions.join(', ') || 'N/A';
   };
 
   return (
     <>
       <Typography variant="h4" gutterBottom>
-        Add New Item
+        Upload Preferences CSV
       </Typography>
-      <Paper sx={{ p: 3 }}>
+      <Paper sx={{ p: 3, mb: 3 }}>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            required
-            name="id"
-            label="ID"
-            type="number"
-            value={formData.id}
-            onChange={handleChange}
-            fullWidth
+          <input
+            accept=".csv"
+            style={{ display: 'none' }}
+            id="csv-file-upload"
+            type="file"
+            onChange={handleFileChange}
           />
-          <TextField
-            required
-            name="name"
-            label="Name"
-            value={formData.name}
-            onChange={handleChange}
-            fullWidth
-          />
+          <label htmlFor="csv-file-upload">
+            <Button variant="contained" component="span">
+              Choose CSV File
+            </Button>
+          </label>
+          {file && (
+            <Typography variant="body1">
+              Selected file: {file.name}
+            </Typography>
+          )}
           <Button
             type="submit"
             variant="contained"
             color="primary"
+            disabled={!file || loading}
             sx={{ mt: 2 }}
           >
-            Submit
+            {loading ? <CircularProgress size={24} /> : 'Upload and Process'}
           </Button>
         </Box>
       </Paper>
+
+      {results.length > 0 && (
+        <>
+          <Typography variant="h6" gutterBottom sx={{ mt: 4 }}>
+            Matching Inventory Items
+          </Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Product Number</TableCell>
+                  <TableCell>Material</TableCell>
+                  <TableCell>Form</TableCell>
+                  <TableCell>Choice</TableCell>
+                  <TableCell>Grade</TableCell>
+                  <TableCell>Dimensions</TableCell>
+                  <TableCell>Weight (t)</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {results.map((row, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{row.product_number}</TableCell>
+                    <TableCell>{row.material}</TableCell>
+                    <TableCell>{row.form}</TableCell>
+                    <TableCell>{row.choice}</TableCell>
+                    <TableCell>{row.grade}</TableCell>
+                    <TableCell>{getDimensions(row)}</TableCell>
+                    <TableCell>{row.weight_t}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>
+      )}
+
       <Snackbar
         open={showSuccess}
         autoHideDuration={6000}
         onClose={() => setShowSuccess(false)}
       >
-        <Alert severity="success">Item added successfully!</Alert>
+        <Alert severity="success">Preferences processed and matching items found!</Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+      >
+        <Alert severity="error">{error}</Alert>
       </Snackbar>
     </>
   );
