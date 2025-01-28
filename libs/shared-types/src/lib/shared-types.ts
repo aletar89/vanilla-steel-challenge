@@ -1,9 +1,12 @@
+import { Generated } from 'kysely';
+
 export function sharedTypes(): string {
   return 'shared-types';
 }
 
 export interface Database {
   inventory: InventoryRow;
+  preferences: PreferenceRow;
 }
 
 export interface InventoryRow {
@@ -32,4 +35,18 @@ export interface InventoryRow {
 export interface InventoryStatsType {
   totalItems: number;
   totalVolume: number;
+}
+
+export interface PreferenceRow {
+  id: Generated<number>;
+  filename: string;
+  timestamp: string;
+  material: string;
+  form: string;
+  grade: string;
+  choice: string;
+  min_width: number;
+  max_width: number;
+  min_thickness: number;
+  max_thickness: number;
 }

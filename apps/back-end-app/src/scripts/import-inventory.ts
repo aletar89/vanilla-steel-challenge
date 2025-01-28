@@ -6,6 +6,42 @@ import { InventoryRow } from '@org/shared-types';
 
 const BATCH_SIZE = 1000; // Process 1000 records at a time
 
+async function ensurePreferencesTable() {
+  try {
+    // Check if table exists
+    const tableExists = await db.selectFrom('preferences')
+      .select('id')
+      .limit(1)
+      .execute()
+      .then(() => true)
+      .catch(() => false);
+
+    if (!tableExists) {
+      console.log('Creating preferences table...');
+      await db.schema
+        .createTable('preferences')
+        .addColumn('id', 'serial', col => col.primaryKey())
+        .addColumn('filename', 'varchar(255)', col => col.notNull())
+        .addColumn('timestamp', 'timestamptz', col => col.notNull())
+        .addColumn('material', 'varchar(255)', col => col.notNull())
+        .addColumn('form', 'varchar(255)', col => col.notNull())
+        .addColumn('grade', 'varchar(255)', col => col.notNull())
+        .addColumn('choice', 'varchar(255)', col => col.notNull())
+        .addColumn('min_width', 'numeric', col => col.notNull())
+        .addColumn('max_width', 'numeric', col => col.notNull())
+        .addColumn('min_thickness', 'numeric', col => col.notNull())
+        .addColumn('max_thickness', 'numeric', col => col.notNull())
+        .execute();
+      console.log('Preferences table created successfully');
+    } else {
+      console.log('Preferences table already exists');
+    }
+  } catch (error) {
+    console.error('Error ensuring preferences table:', error);
+    throw error;
+  }
+}
+
 async function countCsvRows(filePath: string): Promise<number> {
   return new Promise((resolve, reject) => {
     let rowCount = 0;
@@ -21,9 +57,12 @@ async function countCsvRows(filePath: string): Promise<number> {
 }
 
 async function importInventory() {
-  const csvFilePath = path.resolve(__dirname, '../../../../data/inventory.csv');
-  
   try {
+    // Ensure preferences table exists
+    await ensurePreferencesTable();
+    
+    const csvFilePath = path.resolve(__dirname, '../../../../data/inventory.csv');
+    
     // Count CSV rows first
     const totalRows = await countCsvRows(csvFilePath);
     console.log(`Total rows in CSV: ${totalRows}`);
