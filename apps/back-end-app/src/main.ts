@@ -2,9 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { getInventoryStats, getInventory, insertPreferences, findMatchingInventory } from './lib/db-client';
 import multer from 'multer';
-import { parse } from 'csv-parse';
-import { Readable } from 'stream';
-import { PreferenceRow} from '@org/shared-types';
+import { parsePreferencesFromCsv } from './lib/csv-parser';
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
@@ -57,40 +55,10 @@ app.post('/api/upload-csv', upload.single('file'), async (req, res) => {
   }
 
   try {
-    const preferences: Omit<PreferenceRow, 'id'>[] = [];
-    const parser = parse({
-      columns: true,
-      skip_empty_lines: true
-    });
-
-    // Create a readable stream from the buffer
-    const stream = Readable.from(req.file.buffer.toString());
     const filename = req.file?.originalname || 'no_name.csv';
     const timestamp = new Date().toISOString();
-    // Process the CSV data and collect all preferences
-    await new Promise<void>((resolve, reject) => {
-      stream.pipe(parser)
-        .on('data', (record: any) => {
-          // Skip lines where all values are empty/null
-          if (Object.values(record).every(value => !value)) {
-            return;
-          }
-          preferences.push({
-            filename: filename,
-            timestamp: timestamp,
-            material: record['Material'],
-            form: record['Form'],
-            grade: record['Grade'],
-            choice: record['Choice'],
-            min_width: record['Width (Min)'] ? parseFloat(record['Width (Min)']) : null,
-            max_width: record['Width (Max)'] ? parseFloat(record['Width (Max)']) : null,
-            min_thickness: record['Thickness (Min)'] ? parseFloat(record['Thickness (Min)']) : null,
-            max_thickness: record['Thickness (Max)'] ? parseFloat(record['Thickness (Max)']) : null
-          });
-        })
-        .on('end', () => resolve())
-        .on('error', reject);
-    });
+    
+    const preferences = await parsePreferencesFromCsv(req.file.buffer, filename, timestamp );
 
     // Insert preferences into database
     await insertPreferences(preferences);
