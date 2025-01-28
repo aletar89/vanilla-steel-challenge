@@ -19,6 +19,32 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // API routes
+app.get('/api/inventory/stats', async (req, res) => {
+  try {
+    const totalItems = await db
+      .selectFrom('inventory')
+      .select(({ fn }) => [
+        fn.count('id').as('total')
+      ])
+      .executeTakeFirst();
+
+    const totalVolume = await db
+      .selectFrom('inventory')
+      .select(({ fn }) => [
+        fn.sum('weight_t').as('totalWeight')
+      ])
+      .executeTakeFirst();
+
+    res.json({
+      totalItems: totalItems?.total || 0,
+      totalVolume: totalVolume?.totalWeight || 0
+    });
+  } catch (error) {
+    console.error('Error fetching inventory stats:', error);
+    res.status(500).json({ error: 'Failed to fetch inventory statistics' });
+  }
+});
+
 app.get('/api/inventory', async (req, res) => {
   try {
     const inventory = await db

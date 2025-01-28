@@ -28,3 +28,8 @@ export interface InventoryRow {
   certificates: string | null;
   location: string | null;
 }
+
+export interface InventoryStatsType {
+  totalItems: number;
+  totalVolume: number;
+}

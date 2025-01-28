@@ -69,7 +69,7 @@ async function importInventory() {
         finish: record['Finish'] || null,
         surface: record['Surface'] || null,
         quantity: parseInt(record['Quantity']),
-        weight: parseFloat(record['Weight (t)']),
+        weight_t: parseFloat(record['Weight (t)']),
         length_mm: record['Length (mm)'] ? parseFloat(record['Length (mm)']) : null,
         width_mm: record['Width (mm)'] ? parseFloat(record['Width (mm)']) : null,
         height_mm: record['Height (mm)'] ? parseFloat(record['Height (mm)']) : null,
