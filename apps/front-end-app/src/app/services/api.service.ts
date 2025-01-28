@@ -47,7 +47,6 @@ const apiService = {
     const cacheKey = `${page}-${pageSize}-${formChoiseSortOrder || 'none'}`;
     const cachedData = cache[cacheKey];
     
-    // Return cached data if it exists and hasn't expired
     if (cachedData && Date.now() - cachedData.timestamp < CACHE_EXPIRY_MS) {
       return cachedData.data as PaginatedInventory;
     }
@@ -56,7 +55,6 @@ const apiService = {
       params: { page, pageSize, formChoiseSortOrder: formChoiseSortOrder }
     });
 
-    // Cache the new data
     cache[cacheKey] = {
       data: response.data,
       timestamp: Date.now()
@@ -67,14 +65,12 @@ const apiService = {
   getInventoryStats: async (): Promise<InventoryStatsType> => {
     const cachedData = cache['stats'];
     
-    // Return cached data if it exists and hasn't expired
     if (cachedData && Date.now() - cachedData.timestamp < CACHE_EXPIRY_MS) {
       return cachedData.data as InventoryStatsType;
     }
 
     const response = await api.get<InventoryStatsType>('/api/inventory/stats');
     
-    // Cache the new data
     cache['stats'] = {
       data: response.data,
       timestamp: Date.now()
@@ -87,7 +83,6 @@ const apiService = {
       const fileHash = await calculateFileHash(file);
       const cachedUpload = cache[fileHash];
 
-      // Return cached response if file was recently uploaded
       if (cachedUpload && Date.now() - cachedUpload.timestamp < CACHE_EXPIRY_MS) {
         return cachedUpload.data as CSVUploadResponse;
       }
@@ -100,7 +95,6 @@ const apiService = {
         },
       });
 
-      // Cache the response
       cache[fileHash] = {
         data: response.data,
         timestamp: Date.now()
