@@ -4,11 +4,10 @@ import * as path from 'path';
 import db from '../lib/db-client';
 import { InventoryRow } from '@org/shared-types';
 
-const BATCH_SIZE = 1000; // Process 1000 records at a time
+const BATCH_SIZE = 1000; 
 
 async function ensureInventoryTable() {
   try {
-    // Check if table exists
     const tableExists = await db.selectFrom('inventory')
       .select('id')
       .limit(1)
@@ -53,7 +52,6 @@ async function ensureInventoryTable() {
 
 async function ensurePreferencesTable() {
   try {
-    // Check if table exists
     const tableExists = await db.selectFrom('preferences')
       .select('id')
       .limit(1)
@@ -107,17 +105,14 @@ async function countCsvRows(filePath: string): Promise<number> {
 
 async function importInventory() {
   try {
-    // Ensure both tables exist
     await ensureInventoryTable();
     await ensurePreferencesTable();
     
     const csvFilePath = path.resolve(__dirname, '../../../../data/inventory.csv');
     
-    // Count CSV rows first
     const totalRows = await countCsvRows(csvFilePath);
     console.log(`Total rows in CSV: ${totalRows}`);
 
-    // Get initial count
     const initialCount = await db.selectFrom('inventory')
       .select(db.fn.count<string>('id').as('count'))
       .executeTakeFirst()
@@ -130,7 +125,6 @@ async function importInventory() {
       return;
     }
 
-    // Clear table if partially filled
     if (initialCount > 0) {
       console.log('Table is partially filled. Clearing existing records...');
       await db.deleteFrom('inventory').execute();
@@ -173,7 +167,6 @@ async function importInventory() {
 
       processedCount++;
 
-      // When batch is full or we've reached the end, insert the batch
       if (batch.length === BATCH_SIZE || processedCount === totalRows) {
         await db.insertInto('inventory')
           .values(batch)
@@ -185,11 +178,10 @@ async function importInventory() {
           lastReportedPercentage = currentPercentage;
         }
         
-        batch = []; // Clear the batch after insertion
+        batch = [];
       }
     }
 
-    // Get final count
     const finalCount = await db.selectFrom('inventory')
       .select(db.fn.count<string>('id').as('count'))
       .executeTakeFirst()

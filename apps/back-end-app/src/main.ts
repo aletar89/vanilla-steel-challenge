@@ -8,7 +8,6 @@ const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
 const app = express();
 
-// CORS configuration
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production'
     ? 'https://vanilla-steel-challenge-frontend.onrender.com'
@@ -20,7 +19,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Add multer for file upload handling
 const upload = multer({ storage: multer.memoryStorage() });
 
 // API routes
@@ -60,10 +58,8 @@ app.post('/api/upload-csv', upload.single('file'), async (req, res) => {
     
     const preferences = await parsePreferencesFromCsv(req.file.buffer, filename, timestamp );
 
-    // Insert preferences into database
     await insertPreferences(preferences);
 
-    // Find matching inventory items
     const matches = await findMatchingInventory(filename, timestamp);
 
     res.json({ data: matches });

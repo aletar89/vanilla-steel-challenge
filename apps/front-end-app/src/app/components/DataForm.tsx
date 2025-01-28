@@ -43,9 +43,13 @@ export function DataForm() {
     try {
       const response = await apiService.uploadCSV(file);
       setResults(response.data);
-      setShowSuccess(true);
+      if (response.data.length > 0) {
+        setShowSuccess(true);
+      } else {
+        setError('No matching items found');
+      }
+      // Clear the file and input element
       setFile(null);
-      // Reset the file input
       const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
     } catch (error) {
