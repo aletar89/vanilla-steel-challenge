@@ -61,26 +61,30 @@ async function ensurePreferencesTable() {
       .then(() => true)
       .catch(() => false);
 
-    if (!tableExists) {
-      console.log('Creating preferences table...');
+    if (tableExists) {
+      console.log('Dropping existing preferences table...');
       await db.schema
-        .createTable('preferences')
-        .addColumn('id', 'serial', col => col.primaryKey())
-        .addColumn('filename', 'varchar(255)', col => col.notNull())
-        .addColumn('timestamp', 'timestamptz', col => col.notNull())
-        .addColumn('material', 'varchar(255)', col => col.notNull())
-        .addColumn('form', 'varchar(255)', col => col.notNull())
-        .addColumn('grade', 'varchar(255)', col => col.notNull())
-        .addColumn('choice', 'varchar(255)', col => col.notNull())
-        .addColumn('min_width', 'numeric', col => col.notNull())
-        .addColumn('max_width', 'numeric', col => col.notNull())
-        .addColumn('min_thickness', 'numeric', col => col.notNull())
-        .addColumn('max_thickness', 'numeric', col => col.notNull())
+        .dropTable('preferences')
         .execute();
-      console.log('Preferences table created successfully');
-    } else {
-      console.log('Preferences table already exists');
+      console.log('Preferences table dropped successfully');
     }
+
+    console.log('Creating preferences table...');
+    await db.schema
+      .createTable('preferences')
+      .addColumn('id', 'serial', col => col.primaryKey())
+      .addColumn('filename', 'varchar(255)', col => col.notNull())
+      .addColumn('timestamp', 'timestamptz', col => col.notNull())
+      .addColumn('material', 'varchar(255)', col => col.notNull())
+      .addColumn('form', 'varchar(255)', col => col.notNull())
+      .addColumn('grade', 'varchar(255)', col => col.notNull())
+      .addColumn('choice', 'varchar(255)')
+      .addColumn('min_width', 'numeric')
+      .addColumn('max_width', 'numeric')
+      .addColumn('min_thickness', 'numeric')
+      .addColumn('max_thickness', 'numeric')
+      .execute();
+    console.log('Preferences table created successfully');
   } catch (error) {
     console.error('Error ensuring preferences table:', error);
     throw error;
