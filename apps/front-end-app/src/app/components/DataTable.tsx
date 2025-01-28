@@ -13,7 +13,7 @@ import {
   LinearProgress,
   Box,
 } from '@mui/material';
-import apiService, { SortField, SortOrder } from '../services/api.service';
+import apiService, { SortOrder } from '../services/api.service';
 import { InventoryRow } from '@org/shared-types';
 
 export function DataTable() {
