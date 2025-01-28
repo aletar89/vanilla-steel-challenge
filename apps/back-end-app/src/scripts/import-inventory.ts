@@ -6,6 +6,51 @@ import { InventoryRow } from '@org/shared-types';
 
 const BATCH_SIZE = 1000; // Process 1000 records at a time
 
+async function ensureInventoryTable() {
+  try {
+    // Check if table exists
+    const tableExists = await db.selectFrom('inventory')
+      .select('id')
+      .limit(1)
+      .execute()
+      .then(() => true)
+      .catch(() => false);
+
+    if (!tableExists) {
+      console.log('Creating inventory table...');
+      await db.schema
+        .createTable('inventory')
+        .addColumn('id', 'serial', col => col.primaryKey())
+        .addColumn('product_number', 'varchar(255)', col => col.notNull())
+        .addColumn('material', 'varchar(255)', col => col.notNull())
+        .addColumn('form', 'varchar(255)', col => col.notNull())
+        .addColumn('choice', 'varchar(255)', col => col.notNull())
+        .addColumn('grade', 'varchar(255)', col => col.notNull())
+        .addColumn('finish', 'varchar(255)')
+        .addColumn('surface', 'varchar(255)')
+        .addColumn('quantity', 'integer', col => col.notNull())
+        .addColumn('weight_t', 'numeric', col => col.notNull())
+        .addColumn('length_mm', 'numeric')
+        .addColumn('width_mm', 'numeric')
+        .addColumn('height_mm', 'numeric')
+        .addColumn('thickness_mm', 'numeric')
+        .addColumn('outer_diameter_mm', 'numeric')
+        .addColumn('wall_thickness_mm', 'numeric')
+        .addColumn('web_thickness_mm', 'numeric')
+        .addColumn('flange_thickness_mm', 'numeric')
+        .addColumn('certificates', 'varchar(255)')
+        .addColumn('location', 'varchar(255)')
+        .execute();
+      console.log('Inventory table created successfully');
+    } else {
+      console.log('Inventory table already exists');
+    }
+  } catch (error) {
+    console.error('Error ensuring inventory table:', error);
+    throw error;
+  }
+}
+
 async function ensurePreferencesTable() {
   try {
     // Check if table exists
@@ -58,7 +103,8 @@ async function countCsvRows(filePath: string): Promise<number> {
 
 async function importInventory() {
   try {
-    // Ensure preferences table exists
+    // Ensure both tables exist
+    await ensureInventoryTable();
     await ensurePreferencesTable();
     
     const csvFilePath = path.resolve(__dirname, '../../../../data/inventory.csv');
