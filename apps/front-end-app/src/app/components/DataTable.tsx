@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import apiService, { SortOrder } from '../services/api.service';
 import { InventoryRow } from '@org/shared-types';
+import { getDimensions } from '../utils/dimension-formatter';
 
 export function DataTable() {
   const [inventory, setInventory] = useState<InventoryRow[]>([]);
@@ -65,18 +66,6 @@ export function DataTable() {
     setPage(0);
   };
 
-  const formatDimensions = (row: InventoryRow): string => {
-    const dimensions = [];
-    if (row.length_mm) dimensions.push(`L=${row.length_mm}`);
-    if (row.width_mm) dimensions.push(`W=${row.width_mm}`);
-    if (row.height_mm) dimensions.push(`H=${row.height_mm}`);
-    if (row.thickness_mm) dimensions.push(`T=${row.thickness_mm}`);
-    if (row.outer_diameter_mm) dimensions.push(`OD=${row.outer_diameter_mm}`);
-    if (row.wall_thickness_mm) dimensions.push(`Wt=${row.wall_thickness_mm}`);
-    if (row.web_thickness_mm) dimensions.push(`Tw=${row.web_thickness_mm}`);
-    if (row.flange_thickness_mm) dimensions.push(`Tf=${row.flange_thickness_mm}`);
-    return dimensions.join(', ') || '-';
-  };
 
   return (
     <>
@@ -122,7 +111,7 @@ export function DataTable() {
                   <TableCell>{`${row.form} ${row.choice}`}</TableCell>
                   <TableCell>{`${row.grade} ${row.surface || ''}`}</TableCell>
                   <TableCell>{row.finish || '-'}</TableCell>
-                  <TableCell>{formatDimensions(row)}</TableCell>
+                  <TableCell>{getDimensions(row)}</TableCell>
                   <TableCell>{row.quantity}</TableCell>
                   <TableCell>{row.weight_t}</TableCell>
                   <TableCell>{row.location || '-'}</TableCell>
