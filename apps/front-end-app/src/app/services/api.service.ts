@@ -8,6 +8,9 @@ interface PaginatedResponse<T> {
   total: number;
 }
 
+export type SortOrder = 'asc' | 'desc';
+export type SortField = 'weight_t' | 'form_choice';
+
 const api = axios.create({
   baseURL: environment.apiUrl,
   headers: {
@@ -16,9 +19,13 @@ const api = axios.create({
 });
 
 const apiService = {
-  getInventory: async (page = 1, pageSize = 10): Promise<PaginatedResponse<InventoryRow>> => {
+  getInventory: async (
+    page = 1, 
+    pageSize = 10,
+    sortOrder: SortOrder|undefined = undefined
+  ): Promise<PaginatedResponse<InventoryRow>> => {
     const response = await api.get<PaginatedResponse<InventoryRow>>('/api/inventory', {
-      params: { page, pageSize }
+      params: { page, pageSize, sortOrder }
     });
     return response.data;
   },

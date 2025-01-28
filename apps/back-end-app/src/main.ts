@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import db from './lib/db-client';
+import { Database } from '@org/shared-types';
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
@@ -49,11 +50,25 @@ app.get('/api/inventory', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
+    const sortOrder = (req.query.sortOrder as string)?.toLowerCase();
     const offset = (page - 1) * pageSize;
 
+    let query = db.selectFrom('inventory');
+    if (sortOrder === undefined) {
+      query = query.orderBy('weight_t', 'desc');
+    } else if (sortOrder === 'asc' || sortOrder === 'desc') {
+      query = query
+        .orderBy('form', sortOrder)
+        .orderBy('choice', sortOrder)
+        .orderBy('weight_t', 'desc');
+    } else {
+      console.error('Invalid sort order:', sortOrder);
+      res.status(400).json({ error: 'Invalid sort order' });
+      return;
+    }
+
     const [inventory, totalCount] = await Promise.all([
-      db
-        .selectFrom('inventory')
+      query
         .selectAll()
         .limit(pageSize)
         .offset(offset)

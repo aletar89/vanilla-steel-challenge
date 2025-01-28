@@ -9,8 +9,9 @@ import {
   TableRow,
   Typography,
   TablePagination,
+  TableSortLabel,
 } from '@mui/material';
-import apiService from '../services/api.service';
+import apiService, { SortField, SortOrder } from '../services/api.service';
 import { InventoryRow } from '@org/shared-types';
 
 export function DataTable() {
@@ -18,12 +19,17 @@ export function DataTable() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [total, setTotal] = useState(0);
+  const [formChoiceSort, setFormChoiceSort] = useState<SortOrder | undefined>(undefined);
 
   const fetchInventory = useCallback(async () => {
-    const response = await apiService.getInventory(page + 1, rowsPerPage);
+    const response = await apiService.getInventory(
+      page + 1, 
+      rowsPerPage, 
+      formChoiceSort
+    );
     setInventory(response.data);
     setTotal(response.total);
-  }, [page, rowsPerPage]);
+  }, [page, rowsPerPage, formChoiceSort]);
 
   useEffect(() => {
     fetchInventory();
@@ -35,6 +41,17 @@ export function DataTable() {
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
+  const handleFormChoiceSort = () => {
+    if (formChoiceSort === undefined) {
+      setFormChoiceSort('asc');
+    } else if (formChoiceSort === 'asc') {
+      setFormChoiceSort('desc'); 
+    } else {
+      setFormChoiceSort(undefined);
+    }
     setPage(0);
   };
 
@@ -59,12 +76,22 @@ export function DataTable() {
           <TableHead>
             <TableRow>
               <TableCell>Product Number</TableCell>
-              <TableCell>Form & Choice</TableCell>
+              <TableCell>
+                <TableSortLabel
+                  active={!!formChoiceSort}
+                  direction={formChoiceSort}
+                  onClick={handleFormChoiceSort}
+                >
+                  Form & Choice
+                </TableSortLabel>
+              </TableCell>
               <TableCell>Grade & Surface</TableCell>
               <TableCell>Finish</TableCell>
               <TableCell>Dimensions (mm)</TableCell>
               <TableCell>Quantity</TableCell>
-              <TableCell>Total Weight (t)</TableCell>
+              <TableCell>
+                Total Weight (t) ↓
+              </TableCell>
               <TableCell>Location</TableCell>
             </TableRow>
           </TableHead>
@@ -86,7 +113,7 @@ export function DataTable() {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={total}
+          count={Number(total)}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
