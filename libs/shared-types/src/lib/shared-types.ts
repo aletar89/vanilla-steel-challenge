@@ -16,7 +16,7 @@ export interface InventoryRow {
   finish: string | null;
   surface: string | null;
   quantity: number;
-  weight: number;
+  weight_t: number;
   length_mm: number | null;
   width_mm: number | null;
   height_mm: number | null;
