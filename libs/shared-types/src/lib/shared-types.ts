@@ -49,11 +49,11 @@ export interface PreferenceRow {
   material: string;
   form: string;
   grade: string;
-  choice: string;
-  min_width: number;
-  max_width: number;
-  min_thickness: number;
-  max_thickness: number;
+  choice: string | null;
+  min_width: number | null;
+  max_width: number | null;
+  min_thickness: number | null;
+  max_thickness: number | null;
 }
 
 export type PreferenceMatchRow = Omit<InventoryRow, 'id' | 'finish' | 'surface' | 'quantity'| 'location' | 'certificates'>

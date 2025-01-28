@@ -82,10 +82,10 @@ app.post('/api/upload-csv', upload.single('file'), async (req, res) => {
             form: record['Form'],
             grade: record['Grade'],
             choice: record['Choice'],
-            min_width: parseFloat(record['Width (Min)']),
-            max_width: parseFloat(record['Width (Max)']),
-            min_thickness: parseFloat(record['Thickness (Min)']),
-            max_thickness: parseFloat(record['Thickness (Max)'])
+            min_width: record['Width (Min)'] ? parseFloat(record['Width (Min)']) : null,
+            max_width: record['Width (Max)'] ? parseFloat(record['Width (Max)']) : null,
+            min_thickness: record['Thickness (Min)'] ? parseFloat(record['Thickness (Min)']) : null,
+            max_thickness: record['Thickness (Max)'] ? parseFloat(record['Thickness (Max)']) : null
           });
         })
         .on('end', () => resolve())

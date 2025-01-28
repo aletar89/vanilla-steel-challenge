@@ -103,7 +103,7 @@ export async function findMatchingInventory(filename: string, timestamp: string)
         .or('preferences.choice', '=', eb.ref('inventory.choice'))
       )
       .on((eb) => 
-        eb('preferences.min_width', 'is', null)
+        eb('preferences.min_width', '=', null)
         .or('inventory.width_mm', '>=', eb.ref('preferences.min_width'))
       )
       .on((eb) =>
