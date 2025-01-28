@@ -1,7 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import db, { getInventoryStats, getInventory } from './lib/db-client';
-import { Database } from '@org/shared-types';
+import { getInventoryStats, getInventory } from './lib/db-client';
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000;
 
