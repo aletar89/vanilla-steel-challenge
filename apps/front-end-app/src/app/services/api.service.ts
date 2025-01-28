@@ -11,33 +11,18 @@ export interface CSVUploadResponse {
   data: PreferenceMatchRow[];
 }
 
-interface CacheKey {
-  page: number;
-  pageSize: number;
-  sortOrder?: SortOrder;
-}
+
 
 interface Cache {
   [key: string]: {
-    data: PaginatedInventory | InventoryStatsType;
+    data: PaginatedInventory | InventoryStatsType  | CSVUploadResponse;
     timestamp: number;
   };
 }
 
-interface FileCache {
-  [hash: string]: {
-    response: CSVUploadResponse;
-    timestamp: number;
-  }
-}
-
 const CACHE_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 const cache: Cache = {};
-const fileCache: FileCache = {};
 
-const getCacheKey = (key: CacheKey): string => {
-  return `${key.page}-${key.pageSize}-${key.sortOrder || 'none'}`;
-};
 
 const calculateFileHash = async (file: File): Promise<string> => {
   const buffer = await file.arrayBuffer();
@@ -59,7 +44,7 @@ const apiService = {
     pageSize = 10,
     formChoiseSortOrder: SortOrder|undefined = undefined
   ): Promise<PaginatedInventory> => {
-    const cacheKey = getCacheKey({ page, pageSize, sortOrder: formChoiseSortOrder });
+    const cacheKey = `${page}-${pageSize}-${formChoiseSortOrder || 'none'}`;
     const cachedData = cache[cacheKey];
     
     // Return cached data if it exists and hasn't expired
@@ -100,11 +85,11 @@ const apiService = {
   uploadCSV: async (file: File): Promise<CSVUploadResponse> => {
     try {
       const fileHash = await calculateFileHash(file);
-      const cachedUpload = fileCache[fileHash];
+      const cachedUpload = cache[fileHash];
 
       // Return cached response if file was recently uploaded
       if (cachedUpload && Date.now() - cachedUpload.timestamp < CACHE_EXPIRY_MS) {
-        return cachedUpload.response;
+        return cachedUpload.data as CSVUploadResponse;
       }
 
       const formData = new FormData();
@@ -116,8 +101,8 @@ const apiService = {
       });
 
       // Cache the response
-      fileCache[fileHash] = {
-        response: response.data,
+      cache[fileHash] = {
+        data: response.data,
         timestamp: Date.now()
       };
 
