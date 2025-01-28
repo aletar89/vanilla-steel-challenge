@@ -22,10 +22,10 @@ const apiService = {
   getInventory: async (
     page = 1, 
     pageSize = 10,
-    sortOrder: SortOrder|undefined = undefined
+    formChoiseSortOrder: SortOrder|undefined = undefined
   ): Promise<PaginatedResponse<InventoryRow>> => {
     const response = await api.get<PaginatedResponse<InventoryRow>>('/api/inventory', {
-      params: { page, pageSize, sortOrder }
+      params: { page, pageSize, formChoiseSortOrder: formChoiseSortOrder }
     });
     return response.data;
   },

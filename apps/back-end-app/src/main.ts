@@ -33,9 +33,9 @@ app.get('/api/inventory', async (req, res) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const pageSize = parseInt(req.query.pageSize as string) || 10;
-    const sortOrder = req.query.sortOrder?.toString();
+    const formChoiseSortOrder = req.query.formChoiseSortOrder?.toString();
 
-    const result = await getInventory(page, pageSize, sortOrder);
+    const result = await getInventory(page, pageSize, formChoiseSortOrder);
     res.json(result);
   } catch (error) {
     console.error('Error fetching inventory:', error);
