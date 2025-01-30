@@ -1,7 +1,8 @@
 ## About
 
 This is my first project in Node and React
-See assignment in the data folder
+
+See [assignment](https://github.com/aletar89/vanilla-steel-challenge/blob/main/data/Full%20Stack%20Developer%20-%20Coding%20Challenge.pdf) in the data folder
 
 Deployed at [https://vanilla-steel-challenge-frontend.onrender.com](https://vanilla-steel-challenge-frontend.onrender.com)
 
