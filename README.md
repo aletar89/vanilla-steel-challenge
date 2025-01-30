@@ -1,3 +1,10 @@
+## About
+
+This is my first project in Node and React
+See assignment in the data folder
+
+Deployed at [https://vanilla-steel-challenge-frontend.onrender.com](https://vanilla-steel-challenge-frontend.onrender.com)
+
 ## Run tasks
 
 To run the front-end locally:
